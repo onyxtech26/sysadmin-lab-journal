@@ -87,28 +87,62 @@ Executed the following PowerShell verification commands:
 
 ### 4.1 Domain & Forest Information
 ```powershell
-Get-ADDomain | Select-Object Name, Forest, DomainMode, PDCEmulator, RIDMaster, InfrastructureMaster
+Get-ADDomain
 ```
-*Expected Output:*
+*Live Console Output:*
 ```text
-Name                 : lab
-Forest               : lab.local
-DomainMode           : Windows2016Domain
-PDCEmulator          : DC01.lab.local
-RIDMaster            : DC01.lab.local
-InfrastructureMaster : DC01.lab.local
+AllowedDNSSuffixes                 : {}
+ChildDomains                       : {}
+ComputersContainer                 : CN=Computers,DC=lab,DC=local
+DeletedObjectsContainer            : CN=Deleted Objects,DC=lab,DC=local
+DistinguishedName                  : DC=lab,DC=local
+DNSRoot                            : lab.local
+DomainControllersContainer         : OU=Domain Controllers,DC=lab,DC=local
+DomainMode                         : Windows2016Domain
+DomainSID                          : S-1-5-21-3727344856-3208495336-3448980338
+ForeignSecurityPrincipalsContainer : CN=ForeignSecurityPrincipals,DC=lab,DC=local
+Forest                             : lab.local
+InfrastructureMaster               : DC01.lab.local
+LastLogonReplicationInterval       :
+LinkedGroupPolicyObjects           : {CN={31B2F340-016D-11D2-945F-00C04FB984F9},CN=Policies,CN=System,DC=lab,DC=local}
+LostAndFoundContainer              : CN=LostAndFound,DC=lab,DC=local
+ManagedBy                          :
+Name                               : lab
+NetBIOSName                        : LAB
+ObjectClass                        : domainDNS
+ObjectGUID                         : f1e62338-0848-4118-8828-c0ebe308be16
+ParentDomain                       :
+PDCEmulator                        : DC01.lab.local
+PublicKeyRequiredPasswordRolling   : True
+QuotasContainer                    : CN=NTDS Quotas,DC=lab,DC=local
+ReadOnlyReplicaDirectoryServers    : {}
+ReplicaDirectoryServers            : {DC01.lab.local}
+RIDMaster                          : DC01.lab.local
+SubordinateReferences              : {DC=ForestDnsZones,DC=lab,DC=local, DC=DomainDnsZones,DC=lab,DC=local, CN=Configuration,DC=lab,DC=local}
+SystemsContainer                   : CN=System,DC=lab,DC=local
+UsersContainer                     : CN=Users,DC=lab,DC=local
 ```
 
 ```powershell
-Get-ADForest | Select-Object Name, DomainNamingMaster, SchemaMaster
+Get-ADForest
 ```
-*Expected Output:*
+*Live Console Output:*
 ```text
-Name               : lab.local
-DomainNamingMaster : DC01.lab.local
-SchemaMaster       : DC01.lab.local
+ApplicationPartitions : {DC=ForestDnsZones,DC=lab,DC=local, DC=DomainDnsZones,DC=lab,DC=local}
+CrossForestReferences : {}
+DomainNamingMaster    : DC01.lab.local
+Domains               : {lab.local}
+ForestMode            : Windows2016Forest
+GlobalCatalogs        : {DC01.lab.local}
+Name                  : lab.local
+PartitionsContainer   : CN=Partitions,CN=Configuration,DC=lab,DC=local
+RootDomain            : lab.local
+SchemaMaster          : DC01.lab.local
+Sites                 : {Default-First-Site-Name}
+SPNSuffixes           : {}
+UPNSuffixes           : {}
 ```
-*(All 5 FSMO roles are confirmed residing on `DC01` as the initial forest root DC).*
+*(All 5 FSMO roles confirmed active on `DC01.lab.local`).*
 
 ### 4.2 Active Directory Core Services Status
 ```powershell
