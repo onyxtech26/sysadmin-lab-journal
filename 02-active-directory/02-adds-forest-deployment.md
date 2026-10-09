@@ -53,7 +53,6 @@ $secPass = ConvertTo-SecureString "P@ssw0rd123!" -AsPlainText -Force
 # 2. Define parameters via hashtable (splatting)
 $params = @{
     DomainName                    = "lab.local"
-    DomainNetbiosName             = "LAB"
     InstallDns                    = $true
     SafeModeAdministratorPassword = $secPass
     Force                         = $true
@@ -62,6 +61,8 @@ $params = @{
 # 3. Execute forest promotion
 Install-ADDSForest @params
 ```
+
+> **Note on NetBIOS Naming:** The NetBIOS name automatically defaults to `LAB` derived from the primary domain label `lab.local`. Omitting `-DomainNetbiosName` avoids known prerequisite validation exceptions (`DCPromo.General.77`) in Windows Server 2022.
 
 > **Parameter Breakdown:**
 > * `-DomainName "lab.local"`: Defines the Fully Qualified Domain Name (FQDN) for the forest root.

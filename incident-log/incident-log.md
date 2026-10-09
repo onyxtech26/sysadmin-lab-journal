@@ -132,4 +132,43 @@ Isolate why PowerShell registered a standalone `-` positional parameter and pass
    *By defining the parameters inside a hashtable, keys do not contain hyphens, completely removing the surface area for terminal paste syntax errors.*
 
 ### Result
-The splatted hashtable passed all parameters into `Install-ADDSForest` without syntax anomalies. AD DS forest promotion proceeded through schema and partition generation. Documented parameter splatting as standard operating procedure for all subsequent multi-parameter cmdlets.
+The splatted hashtable passed all parameters into `Install-ADDSForest` without syntax anomalies. Documented parameter splatting as standard operating procedure for all subsequent multi-parameter cmdlets.
+
+---
+
+## Incident 05: DCPromo Prerequisite Failure on Explicit `DomainNetbiosName` (`DCPromo.General.77`)
+
+* **Date:** Phase 2 (Step 2.3)
+* **Impacted Node:** `DC01` (`10.10.10.10`)
+* **Category:** Active Directory Domain Services / DCPromo Validation
+
+### Situation
+Executing `Install-ADDSForest` resulted in a prerequisite check termination:
+```text
+Install-ADDSForest : Verification of prerequisites for Domain Controller promotion failed. The specified argument 'DomainNetbiosName' was not recognized.
+At line:1 char:1
++ Install-ADDSForest @params
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (:) [Install-ADDSForest], TestFailedException
+    + FullyQualifiedErrorId : Test.VerifyDcPromoCore.DCPromo.General.77,Microsoft.DirectoryServices.Deployment.PowerShell.Commands.InstallADDSForestCommand
+```
+
+### Task
+Isolate why the underlying promotion validator rejected the `DomainNetbiosName` argument and establish the `lab.local` forest with NetBIOS identifier `LAB`.
+
+### Action
+1. Researched the diagnostic ID `Test.VerifyDcPromoCore.DCPromo.General.77`. In Windows Server 2022, passing `-DomainNetbiosName` explicitly into `Install-ADDSForest` can trigger a known argument-parsing mismatch between the PowerShell wrapper and the underlying `dcpromo.dll` verification routines.
+2. Verified Active Directory forest root provisioning behavior: When `-DomainName "lab.local"` is specified without an explicit NetBIOS parameter, the promotion engine automatically extracts the leftmost label (`LAB`) and validates it against NetBIOS standards (<= 15 characters, no illegal characters) automatically.
+3. Updated the parameter hashtable to omit the explicit `DomainNetbiosName` key:
+   ```powershell
+   $params = @{
+       DomainName                    = "lab.local"
+       InstallDns                    = $true
+       SafeModeAdministratorPassword = $secPass
+       Force                         = $true
+   }
+   Install-ADDSForest @params
+   ```
+
+### Result
+Prerequisite validation completed successfully. The promotion engine derived `LAB` as the NetBIOS domain name by default, successfully initialized directory partitions, and proceeded to automatic server restart.
