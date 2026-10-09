@@ -53,3 +53,43 @@ Ensure that promoting the server to a Domain Controller does not cause split-bra
 
 ### Result
 The AD DS forest installation completed without DNS delegation errors. Upon reboot, running `Resolve-DnsName -Name "_ldap._tcp.dc._msdcs.lab.local" -Type SRV` verified that `DC01` successfully resolved its own Kerberos and LDAP service records.
+
+---
+
+## Incident 03: PowerShell Subexpression Parser Error on Remote SSH Session
+
+* **Date:** Phase 2 (Step 2.3)
+* **Impacted Node:** `DC01` (`10.10.10.10`)
+* **Category:** Remote Terminal / PowerShell Syntax & Parser
+
+### Situation
+When pasting the multiline `Install-ADDSForest` cmdlet into an active SSH terminal session on the Windows host, the command failed with the following parser errors:
+```text
+At line:5 char:61
++       -SafeModeAdministratorPassword (ConvertTo-SecureString
++                                                             ~
+Missing closing ')' in expression.
+At line:6 char:37
++   "P@ssw0rd123!" -AsPlainText -Force) `
++                                     ~
+Unexpected token ')' in expression or statement.
+    + CategoryInfo          : ParserError: (:) [], ParentContainsErrorRecordException
+    + FullyQualifiedErrorId : MissingEndParenthesisInExpression
+```
+
+### Task
+Successfully provide a secure `System.Security.SecureString` object to `-SafeModeAdministratorPassword` without encountering terminal buffer splits.
+
+### Action
+1. Analyzed root cause: Remote SSH terminal emulators often break lines at carriage returns during interactive multi-line buffer transfers. When an inline subexpression `(...)` spans across line breaks continued with backticks (`` ` ``), the parser attempts to evaluate `(ConvertTo-SecureString` prematurely before receiving the closing parenthesis on the subsequent line.
+2. Refactored the command to decouple input object creation from cmdlet execution:
+   ```powershell
+   # Store the secure string into a standalone variable
+   $secPass = ConvertTo-SecureString "P@ssw0rd123!" -AsPlainText -Force
+
+   # Reference variable directly in single execution block
+   Install-ADDSForest -DomainName "lab.local" -DomainNetbiosName "LAB" -InstallDns:$true -SafeModeAdministratorPassword $secPass -Force:$true
+   ```
+
+### Result
+The cmdlet parsed cleanly without terminal buffer truncation. Active Directory forest provisioning commenced immediately. Documented this best practice for headless PowerShell remoting.

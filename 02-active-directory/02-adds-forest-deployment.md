@@ -44,13 +44,18 @@ Install-WindowsFeature AD-Domain-Services -IncludeManagementTools
 > * `-IncludeManagementTools`: Installs the Active Directory PowerShell module (`Microsoft.ActiveDirectory.Management`) and command-line administrative tools (`dcdiag`, `repadmin`, `ntdsutil`).
 
 ### 3.2 Forest Promotion & Domain Creation
-Executed the forest deployment script:
+To prevent terminal paste-buffer parsing errors with inline subexpressions over remote SSH, the DSRM credential is created as a dedicated variable first:
+
 ```powershell
+# Store DSRM secure password in variable
+$secPass = ConvertTo-SecureString "P@ssw0rd123!" -AsPlainText -Force
+
+# Execute forest promotion
 Install-ADDSForest `
   -DomainName "lab.local" `
   -DomainNetbiosName "LAB" `
   -InstallDns:$true `
-  -SafeModeAdministratorPassword (ConvertTo-SecureString "YourSecureDSRMPass1!" -AsPlainText -Force) `
+  -SafeModeAdministratorPassword $secPass `
   -Force:$true
 ```
 
