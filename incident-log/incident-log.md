@@ -13,20 +13,24 @@ Technical interviewers frequently ask: *"Tell me about a time a system or servic
 * **Category:** Network Adapter Configuration / Hypervisor Routing
 
 ### Situation
-After completing the Ubuntu Server installation and applying the static IP `10.10.10.11` via Netplan, executing `ssh <user>@10.10.10.11` from the Windows host terminal resulted in an immediate connection timeout (`Connection timed out` / unreachable host).
+After completing the Ubuntu Server installation and applying static IP `10.10.10.11` via Netplan on the `LabNet` NAT Network, attempting to connect directly from the Windows host terminal (`ssh user@10.10.10.11`) resulted in a connection timeout (`Destination Host Unreachable` / timeout).
 
 ### Task
-Determine why the host machine could not route packets to the guest VM on `10.10.10.11` and establish stable remote terminal access.
+Establish reliable host-to-guest SSH terminal access into both `lab-linux-01` and `DC01` without exposing the VMs to the local physical LAN (Bridged mode) or adding unnecessary secondary virtual adapters.
 
 ### Action
-1. Inspected VM network adapter status from the VirtualBox hypervisor settings.
-2. Discovered Adapter 1 was left on default `NAT` instead of `NAT Network` (`LabNet`). Standard VirtualBox NAT isolates the VM in an individual internal sandbox with port translation, preventing direct inbound addressing from the host subnet without manual port forwarding.
-3. Switched Adapter 1 attachment to **NAT Network** -> **LabNet**.
-4. Inside the VM, verified interface state using `ip a show dev enp0s3` and confirmed the default gateway `10.10.10.1` was reachable via `ping -c 2 10.10.10.1`.
-5. Tested port 22 listener state on the guest using `sudo ss -tulpn | grep :22`.
+1. Analyzed hypervisor network topology: In VirtualBox, a **NAT Network** isolates the guest subnet from host routing. Packets originating from the physical host cannot reach `10.10.10.x` directly without host-side route tables or port translation.
+2. Navigated to VirtualBox `Tools -> Network Manager -> NAT Networks -> LabNet -> Port Forwarding`.
+3. Created explicit forwarding rules:
+   * **Rule 1 (Linux):** Host Port `2222` -> Guest IP `10.10.10.11`, Guest Port `22`.
+   * **Rule 2 (Windows Server):** Host IP `127.0.0.1`, Host Port `2223` -> Guest IP `10.10.10.10`, Guest Port `22`.
+4. Tested listener response on host via PowerShell: `Test-NetConnection -ComputerName 127.0.0.1 -Port 2222` and `-Port 2223`.
 
 ### Result
-Once attached to `LabNet`, the host machine immediately completed the TCP 3-way handshake on port 22, and SSH key authentication succeeded. Documented this prerequisite in Phase 0 hypervisor standards.
+Both guest virtual machines became instantly accessible from the host terminal using standard port switches:
+* Linux: `ssh -p 2222 <username>@127.0.0.1`
+* Windows DC: `ssh -p 2223 Administrator@127.0.0.1`
+This preserved the isolated lab network boundary while delivering responsive, headless administration across both operating systems.
 
 ---
 

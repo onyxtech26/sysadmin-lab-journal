@@ -85,12 +85,12 @@ ping -c 3 10.10.10.1
 ping -c 3 8.8.8.8
 ```
 
-### 4.3 Remote SSH Connection (from Host)
-Verified direct administration from the host machine terminal:
+### 4.3 Remote SSH Connection (from Host via NAT Port Forwarding)
+Because `LabNet` is a NAT Network, direct host routing to `10.10.10.11` is bridged using VirtualBox port forwarding (Host `2222` -> Guest `10.10.10.11:22`). Verified direct administration from the host machine terminal:
 ```bash
-ssh <username>@10.10.10.11
+ssh -p 2222 <username>@127.0.0.1
 ```
-Successful authentication established remote headless access, removing the need to interact with the VirtualBox graphical window.
+Successful authentication established remote headless access, removing the need to interact with the VirtualBox graphical console window.
 
 ---
 

@@ -105,12 +105,12 @@ Test-Connection -ComputerName 10.10.10.1 -Count 2 -Quiet
 # Output: True
 ```
 
-### 4.4 Remote Management from Host (SSH)
-Tested direct SSH administration from the host terminal into `DC01`:
+### 4.4 Remote Management from Host (SSH via NAT Port Forwarding)
+Because `LabNet` is an isolated NAT Network, host terminal traffic is routed through VirtualBox port forwarding rule `SSH-Windows-DC` (Host `127.0.0.1:2223` -> Guest `10.10.10.10:22`). Tested direct SSH administration from the physical workstation:
 ```powershell
-ssh Administrator@10.10.10.10
+ssh -p 2223 Administrator@127.0.0.1
 ```
-Verified interactive PowerShell session access from the physical workstation, confirming identical headless remote management capability across both Windows and Linux infrastructure nodes.
+Verified interactive PowerShell session access from the host terminal, confirming identical headless remote management capability across both Windows and Linux infrastructure nodes.
 
 ---
 

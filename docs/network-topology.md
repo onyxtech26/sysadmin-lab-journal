@@ -26,14 +26,24 @@ This document defines the network architecture, addressing layout, and hardware 
 
 ---
 
-## 3. Port Matrix & Required Traffic Paths
+## 3. Host Remote Management (NAT Network Port Forwarding)
+
+VirtualBox NAT Networks isolate the guest subnet from host-routed traffic. To enable remote management directly from the host terminal, port forwarding was provisioned:
+
+| Host Source | Host Port | Target Guest IP | Guest Port | Target System | Remote Access Command |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| `127.0.0.1` | `2223` | `10.10.10.10` | `22` (SSH) | `DC01` (Windows Server Core) | `ssh -p 2223 Administrator@127.0.0.1` |
+| `0.0.0.0` (Any) | `2222` | `10.10.10.11` | `22` (SSH) | `lab-linux-01` (Ubuntu Server) | `ssh -p 2222 <user>@127.0.0.1` |
+
+---
+
+## 4. Port Matrix & Required Inter-VM Traffic Paths
 
 | Source | Destination | Protocol / Port | Service / Purpose |
 | :--- | :--- | :--- | :--- |
-| `Host Machine` | `10.10.10.11` | TCP / 22 | OpenSSH Remote Administration (Linux) |
-| `Host Machine` | `10.10.10.10` | TCP / 22 | OpenSSH Remote Administration (Windows Server Core) |
 | `lab-client-01` | `10.10.10.10` | TCP/UDP 53 | DNS Resolution |
 | `lab-client-01` | `10.10.10.10` | TCP/UDP 88 | Kerberos Authentication |
 | `lab-client-01` | `10.10.10.10` | TCP/UDP 389 | LDAP Directory Lookups |
 | `lab-client-01` | `10.10.10.10` | TCP 445 | SMB / Group Policy Retrieval (`SYSVOL`) |
+| `lab-client-01` | `10.10.10.11` | TCP 445 | SMB File Share Access (Samba - Phase 3) |
 | `All Nodes` | `10.10.10.1` | ICMP / Any | Gateway NAT routing to Internet |

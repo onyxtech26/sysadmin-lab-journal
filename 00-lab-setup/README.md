@@ -35,7 +35,26 @@ Configured via `VirtualBox GUI -> File -> Tools -> Network Manager -> NAT Networ
 * **Enable DHCP:** Selected (used as fallback)
 * **IPv6 Support:** Disabled (simplified IPv4 lab routing)
 
-### 3.3 Media Staging
+### 3.3 NAT Network Port Forwarding (Host-to-Guest Administration)
+By default, a VirtualBox NAT Network isolates guest VMs from direct inbound traffic initiated by the physical host. To enable seamless headless administration over SSH without adding secondary Host-Only adapters, port forwarding rules were defined directly on `LabNet`:
+
+![VirtualBox NAT Network Port Forwarding](../docs/images/nat-network-port-forwarding.png)
+
+| Rule Name | Protocol | Host IP | Host Port | Guest IP | Guest Port | Target Role |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| **SSH-Windows-DC** | TCP | `127.0.0.1` | `2223` | `10.10.10.10` | `22` | Windows Server 2022 Core (`DC01`) |
+| **ssh forwarding** | TCP | `*` (All) | `2222` | `10.10.10.11` | `22` | Ubuntu Server (`lab-linux-01`) |
+
+#### Remote Access Syntax from Host Terminal:
+```bash
+# Connect to Linux Server
+ssh -p 2222 <username>@127.0.0.1
+
+# Connect to Windows Server Core Domain Controller
+ssh -p 2223 Administrator@127.0.0.1
+```
+
+### 3.4 Media Staging
 Retrieved official evaluation and LTS installation media:
 * `windows-server-2022-evaluation.iso` (Microsoft Evaluation Center, 180-day eval)
 * `ubuntu-26.04-live-server-amd64.iso` (Ubuntu Server LTS)
