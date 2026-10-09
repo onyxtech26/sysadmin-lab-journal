@@ -57,7 +57,20 @@ Post-reboot, re-launched `sconfig` and navigated to Option `8` (Network Settings
    * Default Gateway: `10.10.10.1`
 3. Selected Option `2` (Set DNS Servers):
    * Primary DNS: `127.0.0.1` (Points to loopback resolver in anticipation of the AD integrated DNS role)
-4. Exited `sconfig` (Option `15`) back to the command prompt.
+### 3.3 Remote Administration via OpenSSH Server
+To manage Server Core completely headless from the physical host terminal (avoiding VirtualBox GUI clipboard limitations), the OpenSSH Server capability was deployed:
+
+```powershell
+# Install OpenSSH Server capability
+Add-WindowsCapability -Online -Name OpenSSH.Server~~~~0.0.1.0
+
+# Start and set sshd service to automatic startup
+Start-Service sshd
+Set-Service -Name sshd -StartupType 'Automatic'
+
+# Verify inbound firewall rule for port 22
+Get-NetFirewallRule -Name *OpenSSH-Server* | Select-Object Name, Enabled, Direction, Action
+```
 
 ---
 
@@ -92,6 +105,13 @@ Test-Connection -ComputerName 10.10.10.1 -Count 2 -Quiet
 # Output: True
 ```
 
+### 4.4 Remote Management from Host (SSH)
+Tested direct SSH administration from the host terminal into `DC01`:
+```powershell
+ssh Administrator@10.10.10.10
+```
+Verified interactive PowerShell session access from the physical workstation, confirming identical headless remote management capability across both Windows and Linux infrastructure nodes.
+
 ---
 
 ## 5. Checkpoint Summary
@@ -99,3 +119,4 @@ Test-Connection -ComputerName 10.10.10.1 -Count 2 -Quiet
 - [x] Hostname permanently updated to `DC01`.
 - [x] Static IP configuration applied (`10.10.10.10/24`, Gateway: `10.10.10.1`).
 - [x] Local loopback resolver configured (`127.0.0.1`) ready for AD DS promotion.
+- [x] OpenSSH Server capability enabled and verified for headless administration from host machine.

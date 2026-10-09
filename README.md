@@ -84,7 +84,7 @@ graph TD
 
 ## Technical Competencies Highlighted
 
-* **Headless Windows Administration**: Managing Windows Server entirely through Server Core, `sconfig`, and PowerShell without a GUI desktop footprint.
+* **Headless Cross-Platform Administration**: Managing Windows Server Core and Linux Server entirely over OpenSSH and PowerShell remoting from the physical host workstation, eliminating dependence on hypervisor GUI consoles.
 * **Identity & Access Management (IAM)**: AD DS forest bootstrapping, NetBIOS naming, DSRM password lifecycle, and directory schema awareness.
 * **Linux Infrastructure**: Configuration management using YAML-based Netplan, systemd daemon control, and secure remote administration over OpenSSH.
 * **Network Engineering**: IPv4 addressing, subnet masks (`/24`), routing tables, gateway resolution, and local vs. recursive DNS lookups.

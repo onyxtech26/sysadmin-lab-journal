@@ -30,7 +30,8 @@ This document defines the network architecture, addressing layout, and hardware 
 
 | Source | Destination | Protocol / Port | Service / Purpose |
 | :--- | :--- | :--- | :--- |
-| `Host Machine` | `10.10.10.11` | TCP / 22 | OpenSSH Remote Administration |
+| `Host Machine` | `10.10.10.11` | TCP / 22 | OpenSSH Remote Administration (Linux) |
+| `Host Machine` | `10.10.10.10` | TCP / 22 | OpenSSH Remote Administration (Windows Server Core) |
 | `lab-client-01` | `10.10.10.10` | TCP/UDP 53 | DNS Resolution |
 | `lab-client-01` | `10.10.10.10` | TCP/UDP 88 | Kerberos Authentication |
 | `lab-client-01` | `10.10.10.10` | TCP/UDP 389 | LDAP Directory Lookups |
