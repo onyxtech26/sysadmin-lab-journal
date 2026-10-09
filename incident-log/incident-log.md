@@ -172,4 +172,49 @@ Isolate why the underlying promotion validator rejected explicit `DomainNetbiosN
    ```
 
 ### Result
-With redundant parameters removed, prerequisite validation passed cleanly without validation exceptions. The promotion engine automatically installed the DNS server role, created the directory partitions, and initiated the system reboot. Documented minimal parameter design for headless forest provisioning.
+With redundant parameters removed, prerequisite validation passed cleanly without validation exceptions. Documented minimal parameter design for headless forest provisioning.
+
+---
+
+## Incident 06: Promotion Failure Due to Pre-Existing Domain Controller Role (`role: 5 NT5_DC`)
+
+* **Date:** Phase 2 (Step 2.3)
+* **Impacted Node:** `DC01` (`10.10.10.10`)
+* **Category:** Active Directory Domain Services / Promotion State Machine
+
+### Situation
+Subsequent executions of `Install-ADDSForest` returned `Test.VerifyDcPromoCore.DCPromo.General.77` stating:
+```text
+Install-ADDSForest : Verification of prerequisites for Domain Controller promotion failed. The specified argument 'NewDomain' was not recognized.
+```
+
+### Task
+Analyze internal deployment logging to isolate why the promotion engine rejected valid forest creation arguments.
+
+### Action
+1. Queried the last 25 lines of `%systemroot%\debug\dcpromoui.log`:
+   ```text
+   Enter Computer::GetRole DC01
+     role: 5
+     NT5_DC
+   Enter State::GetRunContext NT5_DC
+   Enter State::SetOperation DEMOTE
+   ...
+   Enter CArgumentsSpec::ValidateArgument NewDomain
+   Error: The specified argument 'NewDomain' was not recognized.
+   Exit code is 77
+   ```
+2. Diagnosed root cause:
+   * `role: 5` corresponds to `DsRole_RolePrimaryDomainController` (`NT5_DC`).
+   * `DC01` had already completed promotion to the forest root Domain Controller in a previous run.
+   * Because the host was already a Domain Controller, DCPromo automatically changed operational context to **`DEMOTE`** (`State::SetOperation DEMOTE`).
+   * When promotion arguments (`NewDomain`, `InstallDNS`, `DomainNetbiosName`) were passed to an engine in `DEMOTE` mode, DCPromo rejected them as invalid demotion parameters.
+3. Verified Active Directory operational health via PowerShell:
+   ```powershell
+   Get-ADDomain
+   Get-ADForest
+   (Get-CimInstance Win32_ComputerSystem).DomainRole  # Returned 5 (Primary Domain Controller)
+   ```
+
+### Result
+Confirmed `DC01` is active and healthy as the root Domain Controller for `lab.local`. Prerequisite check was not failing due to bad configuration, but because the forest was already fully operational. Advanced directly to Step 2.4 (DHCP Server deployment).
