@@ -59,7 +59,7 @@ graph TD
   - [x] Post-install configuration via `sconfig` (Rename to `DC01`, static IP `10.10.10.10/24`)
   - [x] Active Directory Domain Services (AD DS) installation & forest promotion (`lab.local`)
   - [x] DHCP Server role installation and scope deployment (`10.10.10.100–200`)
-  - [ ] Enterprise Organizational Unit (OU) design, security groups, and bulk users
+  - [x] Enterprise Organizational Unit (OU) design, security groups, and bulk users
   - [ ] Group Policy Object (GPO) creation and link enforcement
   - [ ] Windows client domain-join validation
   - [ ] Helpdesk service request ticket simulation
