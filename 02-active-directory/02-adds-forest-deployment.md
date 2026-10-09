@@ -43,20 +43,24 @@ Install-WindowsFeature AD-Domain-Services -IncludeManagementTools
 > * `AD-Domain-Services`: Deploys the core directory database engine (`ntds.dit`) and directory binaries.
 > * `-IncludeManagementTools`: Installs the Active Directory PowerShell module (`Microsoft.ActiveDirectory.Management`) and command-line administrative tools (`dcdiag`, `repadmin`, `ntdsutil`).
 
-### 3.2 Forest Promotion & Domain Creation
-To prevent terminal paste-buffer parsing errors with inline subexpressions over remote SSH, the DSRM credential is created as a dedicated variable first:
+### 3.2 Forest Promotion & Domain Creation (PowerShell Splatting)
+To eliminate terminal buffer whitespace splitting and parameter binding syntax errors over remote SSH, parameter **splatting** is utilized:
 
 ```powershell
-# Store DSRM secure password in variable
+# 1. Define DSRM recovery password as secure string
 $secPass = ConvertTo-SecureString "P@ssw0rd123!" -AsPlainText -Force
 
-# Execute forest promotion
-Install-ADDSForest `
-  -DomainName "lab.local" `
-  -DomainNetbiosName "LAB" `
-  -InstallDns:$true `
-  -SafeModeAdministratorPassword $secPass `
-  -Force:$true
+# 2. Define parameters via hashtable (splatting)
+$params = @{
+    DomainName                    = "lab.local"
+    DomainNetbiosName             = "LAB"
+    InstallDns                    = $true
+    SafeModeAdministratorPassword = $secPass
+    Force                         = $true
+}
+
+# 3. Execute forest promotion
+Install-ADDSForest @params
 ```
 
 > **Parameter Breakdown:**

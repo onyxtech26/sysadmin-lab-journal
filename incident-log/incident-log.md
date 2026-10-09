@@ -93,3 +93,43 @@ Successfully provide a secure `System.Security.SecureString` object to `-SafeMod
 
 ### Result
 The cmdlet parsed cleanly without terminal buffer truncation. Active Directory forest provisioning commenced immediately. Documented this best practice for headless PowerShell remoting.
+
+---
+
+## Incident 04: ParameterBindingException on Remote Shell Paste Buffer
+
+* **Date:** Phase 2 (Step 2.3)
+* **Impacted Node:** `DC01` (`10.10.10.10`)
+* **Category:** PowerShell Automation / Shell Parameter Binding
+
+### Situation
+Attempting to run a single-line command with multiple hyphenated switches (`-DomainName ... -DomainNetbiosName ...`) resulted in a `ParameterBindingException`:
+```text
+Install-ADDSForest : A positional parameter cannot be found that accepts argument '-'.
+At line:1 char:5
++     Install-ADDSForest -DomainName "lab.local" -DomainNetbiosName "LA ...
++     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : InvalidArgument: (:) [Install-ADDSForest], ParameterBindingException
+    + FullyQualifiedErrorId : PositionalParameterNotFound,Microsoft.DirectoryServices.Deployment.PowerShell.Commands.InstallADDSForestCommand
+```
+
+### Task
+Isolate why PowerShell registered a standalone `-` positional parameter and pass all configuration switches reliably into `Install-ADDSForest`.
+
+### Action
+1. Investigated root cause: When pasting long command strings into certain SSH/Windows pseudoconsole sessions, terminal word-wrap or encoding can introduce an errant space immediately following a hyphen (e.g., `- DomainName` or ` - Force`), causing PowerShell to interpret the leading dash as an unexpected positional argument rather than a parameter identifier prefix.
+2. Refactored the command structure to use **PowerShell Splatting**:
+   ```powershell
+   $params = @{
+       DomainName                    = "lab.local"
+       DomainNetbiosName             = "LAB"
+       InstallDns                    = $true
+       SafeModeAdministratorPassword = $secPass
+       Force                         = $true
+   }
+   Install-ADDSForest @params
+   ```
+   *By defining the parameters inside a hashtable, keys do not contain hyphens, completely removing the surface area for terminal paste syntax errors.*
+
+### Result
+The splatted hashtable passed all parameters into `Install-ADDSForest` without syntax anomalies. AD DS forest promotion proceeded through schema and partition generation. Documented parameter splatting as standard operating procedure for all subsequent multi-parameter cmdlets.
