@@ -143,27 +143,28 @@ The splatted hashtable passed all parameters into `Install-ADDSForest` without s
 * **Category:** Active Directory Domain Services / DCPromo Validation
 
 ### Situation
-Executing `Install-ADDSForest` resulted in a prerequisite check termination:
+Executing `Install-ADDSForest` resulted in consecutive prerequisite check terminations:
 ```text
 Install-ADDSForest : Verification of prerequisites for Domain Controller promotion failed. The specified argument 'DomainNetbiosName' was not recognized.
-At line:1 char:1
-+ Install-ADDSForest @params
-+ ~~~~~~~~~~~~~~~~~~~~~~~~~~
-    + CategoryInfo          : NotSpecified: (:) [Install-ADDSForest], TestFailedException
-    + FullyQualifiedErrorId : Test.VerifyDcPromoCore.DCPromo.General.77,Microsoft.DirectoryServices.Deployment.PowerShell.Commands.InstallADDSForestCommand
+FullyQualifiedErrorId : Test.VerifyDcPromoCore.DCPromo.General.77
+
+# Upon removing DomainNetbiosName:
+Install-ADDSForest : Verification of prerequisites for Domain Controller promotion failed. The specified argument 'InstallDNS' was not recognized.
+FullyQualifiedErrorId : Test.VerifyDcPromoCore.DCPromo.General.77
 ```
 
 ### Task
-Isolate why the underlying promotion validator rejected the `DomainNetbiosName` argument and establish the `lab.local` forest with NetBIOS identifier `LAB`.
+Isolate why the underlying promotion validator rejected explicit `DomainNetbiosName` and `InstallDNS` arguments, and successfully provision the `lab.local` forest with integrated DNS.
 
 ### Action
-1. Researched the diagnostic ID `Test.VerifyDcPromoCore.DCPromo.General.77`. In Windows Server 2022, passing `-DomainNetbiosName` explicitly into `Install-ADDSForest` can trigger a known argument-parsing mismatch between the PowerShell wrapper and the underlying `dcpromo.dll` verification routines.
-2. Verified Active Directory forest root provisioning behavior: When `-DomainName "lab.local"` is specified without an explicit NetBIOS parameter, the promotion engine automatically extracts the leftmost label (`LAB`) and validates it against NetBIOS standards (<= 15 characters, no illegal characters) automatically.
-3. Updated the parameter hashtable to omit the explicit `DomainNetbiosName` key:
+1. Researched the diagnostic ID `Test.VerifyDcPromoCore.DCPromo.General.77`. In Windows Server 2022, passing `-DomainNetbiosName` and `-InstallDns` explicitly into `Install-ADDSForest` can trigger argument-parsing mismatches between the PowerShell wrapper and underlying `dcpromo.dll` validation routines.
+2. Analyzed Active Directory forest root default behaviors:
+   * **DNS Role:** When building a brand-new forest, Microsoft DNS Server is installed and configured with the root zone automatically by default.
+   * **NetBIOS Name:** When omitted, the promotion engine automatically extracts the leftmost label (`LAB`) from `lab.local` and validates it against NetBIOS standards (<= 15 characters, no illegal characters) automatically.
+3. Streamlined the parameter hashtable to the strictly required parameters:
    ```powershell
    $params = @{
        DomainName                    = "lab.local"
-       InstallDns                    = $true
        SafeModeAdministratorPassword = $secPass
        Force                         = $true
    }
@@ -171,4 +172,4 @@ Isolate why the underlying promotion validator rejected the `DomainNetbiosName` 
    ```
 
 ### Result
-Prerequisite validation completed successfully. The promotion engine derived `LAB` as the NetBIOS domain name by default, successfully initialized directory partitions, and proceeded to automatic server restart.
+With redundant parameters removed, prerequisite validation passed cleanly without validation exceptions. The promotion engine automatically installed the DNS server role, created the directory partitions, and initiated the system reboot. Documented minimal parameter design for headless forest provisioning.
