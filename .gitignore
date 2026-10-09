@@ -1,0 +1,20 @@
+# Lab Media & Virtual Disks
+*.iso
+*.vdi
+*.vmdk
+*.vhd
+*.vhdx
+*.box
+*.vbox-extpack
+
+# OS & Editor Artifacts
+.DS_Store
+Thumbs.db
+desktop.ini
+.vscode/
+.idea/
+
+# Logs & Temporary Files
+*.log
+*.tmp
+*.bak
