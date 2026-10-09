@@ -22,7 +22,7 @@ Rather than relying on the Windows Desktop Experience (GUI), this entire phase i
 | :--- | :--- | :--- | :--- |
 | **2.1 – 2.2** | [01-server-core-initial-config.md](./01-server-core-initial-config.md) | Server Core deployment, host renaming to `DC01`, static IP assignment via `sconfig` | **Complete** |
 | **2.3** | [02-adds-forest-deployment.md](./02-adds-forest-deployment.md) | AD DS role installation, forest promotion (`lab.local`), DSRM password, post-install verification | **Complete** |
-| **2.4** | `03-dhcp-configuration.md` *(Planned)* | Windows DHCP Server role, scope `10.10.10.100–200`, DNS options, authorization | *Pending* |
+| **2.4** | [03-dhcp-configuration.md](./03-dhcp-configuration.md) | Windows DHCP Server role, scope `10.10.10.100–200`, DNS options, authorization | **Complete** |
 | **2.5** | `04-ou-users-groups.md` *(Planned)* | Tiered OU structure (`Sales`, `IT`, `Finance`), security groups, bulk AD accounts | *Pending* |
 | **2.6** | `05-group-policy.md` *(Planned)* | Group Policy Object creation, linking, and password policy enforcement | *Pending* |
 | **2.7** | `06-domain-join-client.md` *(Planned)* | Domain-joining a Windows client VM via PowerShell | *Pending* |
