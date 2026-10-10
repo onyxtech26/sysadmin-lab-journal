@@ -41,7 +41,7 @@ graph TD
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
 | **Domain Controller** | Windows Server 2022 Standard (Server Core) | `DC01` | `10.10.10.10/24` | `10.10.10.1` | `127.0.0.1` | 4 GB RAM, 2 vCPU, 40 GB dynamic disk | Root DC for `lab.local`, DNS Server, DHCP Server |
 | **Linux Server** | Ubuntu Server LTS | `lab-linux-01` | `10.10.10.11/24` | `10.10.10.1` | `8.8.8.8` | 2 GB RAM, 2 vCPU, 25 GB dynamic disk | Linux administration, OpenSSH, web & storage services |
-| **Workstation Client** | Windows 10/11 (Planned) | `lab-client-01` | DHCP pool | `10.10.10.1` | `10.10.10.10` | 2 GB RAM, 2 vCPU, 30 GB dynamic disk | Domain-joined client for GPO and user simulation |
+| **Workstation Client** | Windows Server 2022 Standard (Server Core) | `lab-client-01` | `10.10.10.11/24` (SSH Port 2224) | `10.10.10.1` | `10.10.10.10` | 2 GB RAM, 2 vCPU, 30 GB dynamic disk | Domain-joined member for GPO and user simulation |
 
 ---
 
@@ -61,7 +61,7 @@ graph TD
   - [x] DHCP Server role installation and scope deployment (`10.10.10.100–200`)
   - [x] Enterprise Organizational Unit (OU) design, security groups, and bulk users
   - [x] Group Policy Object (GPO) creation and link enforcement
-  - [ ] Windows client domain-join validation
+  - [x] Windows client domain-join validation
   - [ ] Helpdesk service request ticket simulation
 - [ ] **Phase 3: Linux Systems Administration & Hardening**
   - [ ] Linux RBAC (users, groups, octal permissions, visudo)

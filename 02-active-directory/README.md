@@ -25,7 +25,7 @@ Rather than relying on the Windows Desktop Experience (GUI), this entire phase i
 | **2.4** | [03-dhcp-configuration.md](./03-dhcp-configuration.md) | Windows DHCP Server role, scope `10.10.10.100–200`, DNS options, authorization | **Complete** |
 | **2.5** | [04-ou-users-groups.md](./04-ou-users-groups.md) | Tiered OU structure (`Sales`, `IT`, `Finance`), security groups, bulk AD accounts | **Complete** |
 | **2.6** | [05-group-policy.md](./05-group-policy.md) | Group Policy Object creation, linking, and password policy enforcement | **Complete** |
-| **2.7** | `06-domain-join-client.md` *(Planned)* | Domain-joining a Windows client VM via PowerShell | *Pending* |
+| **2.7** | [06-domain-join-client.md](./06-domain-join-client.md) | Domain-joining a Windows client VM via PowerShell | **Complete** |
 | **2.8** | `07-ticket-simulation.md` *(Planned)* | Helpdesk scenario: User onboarding, group membership, share mapping, ticket documentation | *Pending* |
 
 ---
