@@ -65,7 +65,7 @@ graph TD
   - [x] Helpdesk service request ticket simulation
 - [ ] **Phase 3: Linux Systems Administration & Hardening**
   - [x] [Linux RBAC, users, groups, octal permissions, visudo](./03-linux-administration/01-rbac-users-groups.md)
-  - [ ] Systemd service lifecycle management and journald log inspection
+  - [x] [Systemd service lifecycle management and journald log inspection](./03-linux-administration/02-package-management-systemd.md)
   - [ ] Cron automation, SSH key authentication hardening, Nginx & Samba setup
 - [ ] **Phase 4: Advanced Networking & pfSense Firewall**
   - [ ] pfSense dual-interface deployment (WAN / LAN)
