@@ -263,14 +263,15 @@ While logged in as standard domain user `LAB\jdoe`, executing `gpresult /r` retu
 Inspect applied Group Policy Objects for the logged-in user without granting unnecessary local administrative privileges.
 
 ### Action
-1. Investigated root cause: Executing `gpresult /r` without scope flags attempts to read both **Computer** and **User** policy settings. Computer policies query machine-level registry paths (`HKLM\Software\Policies`) and WMI namespaces, which strictly require local Administrator rights.
-2. Formulated scoped query command targeting only user-level Group Policy processing:
+1. Investigated root cause: Executing `gpresult /r` without scope flags attempts to read both **Computer** and **User** policy settings. Computer policies query machine-level registry paths (`HKLM\Software\Policies`) and WMI namespaces (`ROOT\RSOP\Computer`), which strictly require local Administrator rights.
+2. In addition, when connected over **OpenSSH**, Windows establishes a **Network Logon (Logon Type 3)**. Under remote network logons, non-administrative accounts are barred from remotely querying the WMI RSOP provider (`ROOT\RSOP\User`), resulting in `Access Denied` even with `/scope user`.
+3. In enterprise administrative workflows, Group Policy verification for non-privileged accounts is evaluated directly from an administrative session targeting the user's security identifier:
    ```cmd
-   gpresult /r /scope user
+   gpresult /r /user "LAB\jdoe"
    ```
 
 ### Result
-`gpresult` parsed successfully under Jane Doe's standard security context, returning applied user policies, SID details, and security group memberships without privilege escalation exceptions.
+Evaluating `gpresult` from the elevated administrative context successfully parsed Jane Doe's applied policies, SIDs, and security group memberships, resolving the remote WMI privilege boundary without compromising the principle of least privilege.
 
 ---
 

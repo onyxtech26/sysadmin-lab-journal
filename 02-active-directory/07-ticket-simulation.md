@@ -114,11 +114,12 @@ PS C:\Users\jdoe> Get-Content "S:\welcome.txt"
 Onboarding ticket simulation successful - Jane Doe
 ```
 
-### 4.3 Group Policy Resultant Set of Policy
+### 4.3 Group Policy Resultant Set of Policy Evaluation
+In an OpenSSH remote session (Network Logon Type 3), non-administrative users are barred from querying the WMI RSOP provider (`ROOT\RSOP\User`). In enterprise operations, the administrator evaluates the user's applied policies from the elevated administrative context:
 ```cmd
-gpresult /r /scope user
+gpresult /r /user "LAB\jdoe"
 ```
-*Validated: Successfully enumerated applied GPOs under Jane Doe's domain user context without privilege escalation exceptions.*
+*Validated: Successfully enumerated applied GPOs under Jane Doe's domain user context (`sales-password-policy`, `Default Domain Policy`) without privilege escalation exceptions.*
 
 ---
 
@@ -126,8 +127,8 @@ gpresult /r /scope user
 
 1. **Effective Permissions = (Share Permissions ∩ NTFS Permissions)**:
    * Setting restrictive permissions at the SMB Share layer often causes unexpected session rejections before NTFS evaluation begins. Modern enterprise standard practice configures broad access at the share layer (`Authenticated Users: Full Control`), relying entirely on the granular NTFS file system ACLs (`LAB\Sales-Team: Modify`) to enforce the principle of least privilege.
-2. **`gpresult` Privilege Boundary**:
-   * Running plain `gpresult /r` as a standard non-admin domain user queries both Computer and User scopes, triggering an immediate `Access Denied` error when touching machine WMI/registry keys. Appending `/scope user` isolates the query strictly to the user's security token.
+2. **`gpresult` Remote Session & Privilege Boundary**:
+   * Running plain `gpresult /r` as a standard non-admin domain user queries both Computer and User scopes, triggering an immediate `Access Denied` error when touching machine WMI/registry keys. Furthermore, over remote OpenSSH sessions (Network Logon Type 3), WMI access is restricted to Administrators. Running `gpresult /r /user "LAB\jdoe"` from the administrator session allows clean verification of the employee's policy state.
 3. **Headless Enterprise Workflow Complete**:
    * The complete lifecycle—from bare-metal installation of Windows Server Core, forest creation, DHCP scoping, OU design, GPO deployment, and client onboarding—was executed and verified 100% headless over PowerShell and OpenSSH.
 
