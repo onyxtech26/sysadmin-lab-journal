@@ -54,7 +54,7 @@ graph TD
   - [x] Minimal Ubuntu Server headless deployment
   - [x] Static IP assignment via Netplan (`10.10.10.11/24`)
   - [x] OpenSSH daemon configuration and host-to-guest verification
-- [ ] **[Phase 2: Windows Server Core & Active Directory](./02-active-directory/README.md)** *(In Progress)*
+- [x] **[Phase 2: Windows Server Core & Active Directory](./02-active-directory/README.md)**
   - [x] Windows Server 2022 Server Core deployment (`lab-dc-01`)
   - [x] Post-install configuration via `sconfig` (Rename to `DC01`, static IP `10.10.10.10/24`)
   - [x] Active Directory Domain Services (AD DS) installation & forest promotion (`lab.local`)
@@ -62,7 +62,7 @@ graph TD
   - [x] Enterprise Organizational Unit (OU) design, security groups, and bulk users
   - [x] Group Policy Object (GPO) creation and link enforcement
   - [x] Windows client domain-join validation
-  - [ ] Helpdesk service request ticket simulation
+  - [x] Helpdesk service request ticket simulation
 - [ ] **Phase 3: Linux Systems Administration & Hardening**
   - [ ] Linux RBAC (users, groups, octal permissions, visudo)
   - [ ] Systemd service lifecycle management and journald log inspection

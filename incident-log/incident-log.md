@@ -218,3 +218,83 @@ Analyze internal deployment logging to isolate why the promotion engine rejected
 
 ### Result
 Confirmed `DC01` is active and healthy as the root Domain Controller for `lab.local`. Prerequisite check was not failing due to bad configuration, but because the forest was already fully operational. Advanced directly to Step 2.4 (DHCP Server deployment).
+
+---
+
+## Incident 07: Client VM Subnet Isolation Due to Default NAT vs NAT Network
+
+* **Date:** Phase 2 (Step 2.7)
+* **Impacted Node:** `lab-client-01`
+* **Category:** Hypervisor Networking / Network Virtualization
+
+### Situation
+Upon deploying the Windows Server Core client VM, executing `Resolve-DnsName lab.local` failed with `DNS_ERROR_RCODE_NAME_ERROR` (`DNS name does not exist`). Running `Get-NetIPConfiguration` revealed the adapter had acquired IP `10.0.2.15`.
+
+### Task
+Connect `lab-client-01` to the shared `LabNet` NAT Network (`10.10.10.0/24`) without reinstalling or recreating the virtual machine.
+
+### Action
+1. Diagnosed root cause: VirtualBox defaults new virtual machine adapters to standalone **NAT** (isolated per-VM slirp engine assigning `10.0.2.15`), preventing communication with `DC01` (`10.10.10.10`).
+2. Identified the client VM's hardware identifier via CLI:
+   ```powershell
+   & "C:\Program Files\Oracle\VirtualBox\VBoxManage.exe" list vms
+   ```
+3. Dynamically modified the active network attachment using VirtualBox CLI:
+   ```powershell
+   & "C:\Program Files\Oracle\VirtualBox\VBoxManage.exe" controlvm "908ffb08-4740-4d62-9a7a-2193436386bf" nic1 natnetwork LabNet
+   ```
+4. Reset the virtual machine (`Restart-Computer`) to initialize the guest socket against the `VBoxNetNAT` daemon.
+
+### Result
+`lab-client-01` successfully established Layer 2/3 connectivity on `LabNet`, resolved `DC01.lab.local`, and joined the Active Directory domain cleanly via `Add-Computer`.
+
+---
+
+## Incident 08: `gpresult` Privilege Boundary Exception on Standard Domain User Session
+
+* **Date:** Phase 2 (Step 2.8)
+* **Impacted Node:** `lab-client-01`
+* **Category:** Group Policy / Security Privileges & RBAC
+
+### Situation
+While logged in as standard domain user `LAB\jdoe`, executing `gpresult /r` returned an immediate `ERROR: Access Denied`.
+
+### Task
+Inspect applied Group Policy Objects for the logged-in user without granting unnecessary local administrative privileges.
+
+### Action
+1. Investigated root cause: Executing `gpresult /r` without scope flags attempts to read both **Computer** and **User** policy settings. Computer policies query machine-level registry paths (`HKLM\Software\Policies`) and WMI namespaces, which strictly require local Administrator rights.
+2. Formulated scoped query command targeting only user-level Group Policy processing:
+   ```cmd
+   gpresult /r /scope user
+   ```
+
+### Result
+`gpresult` parsed successfully under Jane Doe's standard security context, returning applied user policies, SID details, and security group memberships without privilege escalation exceptions.
+
+---
+
+## Incident 09: SMB Share-Level Authorization Denied Despite NTFS Modify Permissions
+
+* **Date:** Phase 2 (Step 2.8)
+* **Impacted Node:** `DC01` (`10.10.10.10`)
+* **Category:** File Services / SMB vs NTFS Effective Permissions
+
+### Situation
+When Jane Doe (`LAB\jdoe`) attempted to write a verification file to the mapped network drive (`"..." | Out-File "S:\welcome.txt"`), PowerShell returned `OpenError: Access to the path 'S:\welcome.txt' is denied`, despite `C:\Shares\Sales` having explicit NTFS Modify permissions granted to `LAB\Sales-Team`.
+
+### Task
+Identify why the SMB layer rejected write requests and align share permissions with enterprise least-privilege standards.
+
+### Action
+1. Evaluated Windows effective permissions model:
+   $$\text{Effective Permission} = \text{Share Permissions} \cap \text{NTFS Permissions}$$
+2. Queried current share access on `DC01` (`Get-SmbShareAccess -Name "Sales"`). The share-level ACL was narrowly restricted to `LAB\Sales-Team (Change)` and `Administrators (Full)`, which rejected the incoming SMB session connection before NTFS evaluation took place.
+3. Aligned the share with Microsoft enterprise best practices: Granted `Full Control` at the SMB Share layer to `Authenticated Users`, allowing incoming domain sessions to pass through to the underlying NTFS ACL where granular security is enforced:
+   ```powershell
+   Grant-SmbShareAccess -Name "Sales" -AccountName "Authenticated Users" -AccessRight Full -Force
+   ```
+
+### Result
+Jane Doe successfully wrote `welcome.txt` to `S:\` and verified file integrity via `Get-Content`, confirming end-to-end RBAC functionality for the Sales department.
+
