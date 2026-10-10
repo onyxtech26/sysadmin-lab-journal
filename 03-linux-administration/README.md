@@ -22,8 +22,8 @@ In corporate environments, Linux servers underpin critical back-end services, we
 | :--- | :--- | :--- | :--- |
 | **3.1 – 3.2** | [01-rbac-users-groups.md](./01-rbac-users-groups.md) | User & group lifecycle, octal permission delegation (`chmod 750`), safe `sudoers` drop-in rules (`/etc/sudoers.d/`) | **Complete** |
 | **3.3 – 3.4** | [02-package-management-systemd.md](./02-package-management-systemd.md) | APT repositories, Nginx web server lifecycle, systemd unit control & journald log inspection | **Complete** |
-| **3.5** | [03-cron-automation.md](./03-cron-automation.md) | Crontab automation, scheduled storage telemetry, log appending | Upcoming |
-| **3.6** | [04-ssh-hardening.md](./04-ssh-hardening.md) | Ed25519 public key authentication, SSH daemon hardening (`sshd_config`), disabling password auth | Upcoming |
+| **3.5** | [03-cron-automation.md](./03-cron-automation.md) | Crontab automation, scheduled storage telemetry, log appending | **Complete** |
+| **3.6** | [04-ssh-hardening.md](./04-ssh-hardening.md) | Ed25519 public key authentication, SSH daemon hardening (`sshd_config`), disabling password auth | In Progress |
 | **3.7** | [05-services-nginx-samba.md](./05-services-nginx-samba.md) | Nginx virtual host serving, Samba CIFS network share (`/srv/labshare`), cross-platform integration | Upcoming |
 | **3.8** | [06-troubleshooting-incidents.md](./06-troubleshooting-incidents.md) | Self-inflicted incident diagnosis: stopped daemons, simulated disk exhaustion (`dd`), and file permission locks | Upcoming |
 

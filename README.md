@@ -66,7 +66,8 @@ graph TD
 - [ ] **Phase 3: Linux Systems Administration & Hardening**
   - [x] [Linux RBAC, users, groups, octal permissions, visudo](./03-linux-administration/01-rbac-users-groups.md)
   - [x] [Systemd service lifecycle management and journald log inspection](./03-linux-administration/02-package-management-systemd.md)
-  - [ ] Cron automation, SSH key authentication hardening, Nginx & Samba setup
+  - [x] [Cron scheduled monitoring automation](./03-linux-administration/03-cron-automation.md)
+  - [ ] SSH key authentication hardening, Nginx & Samba setup
 - [ ] **Phase 4: Advanced Networking & pfSense Firewall**
   - [ ] pfSense dual-interface deployment (WAN / LAN)
   - [ ] VLAN segmentation (VLAN 10: Servers, VLAN 20: Clients)

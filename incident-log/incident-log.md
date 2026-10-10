@@ -355,3 +355,63 @@ Safely verify Bob's administrative delegation without compromising system securi
 ### Result
 `sudo` displayed the secure password prompt on the allocated TTY. Upon supplying credentials, `sudo whoami` returned `root`, confirming that `%devteam` sudoers delegation was operating correctly within security compliance boundaries.
 
+---
+
+## Incident 12: Terminal Line-Wrap Buffer Split Causing Crontab Syntax Error (`bad minute`)
+
+* **Date:** Phase 3 (Step 3.5)
+* **Impacted Node:** `lab-linux-01` (`10.10.10.11`)
+* **Category:** Automation / Crontab Parser & Terminal Buffer Wrapping
+
+### Situation
+When pasting a piped crontab command sequence (`echo "0 1 * * * df -h >> /home/bob/disk-usage.log" | sudo crontab -u bob -`) into an active OpenSSH terminal, the command was rejected by the spool parser with:
+```text
+"-":1: bad minute
+errors in crontab file, can't install.
+```
+
+### Task
+Install the scheduled task into user `bob`'s crontab spool without encountering buffer-induced syntax errors.
+
+### Action
+1. Analyzed parsing error: The SSH pseudo-terminal broke the long string at the redirection operator (`>>`), causing a carriage return.
+2. The second line (`/home/bob/disk-usage.log`) was fed to standard input of `crontab -`. The parser expected 5 time fields (`minute`, `hour`, `day of month`, `month`, `day of week`). Because the line began with a directory path rather than a numeric token between `0-59`, the parser immediately threw `bad minute`.
+3. Re-architected deployment using an atomic buffered file:
+   ```bash
+   echo "0 1 * * * df -h >> /home/bob/disk-usage.log" > /tmp/bobcron
+   sudo crontab -u bob /tmp/bobcron
+   rm /tmp/bobcron
+   ```
+
+### Result
+Crontab validated and installed the rule cleanly without buffer fragmentation. Subsequent `sudo crontab -u bob -l` verified that `0 1 * * *` was registered in the user spool.
+
+---
+
+## Incident 13: Inter-User Home Directory Traversal Access Denied
+
+* **Date:** Phase 3 (Step 3.5)
+* **Impacted Node:** `lab-linux-01` (`10.10.10.11`)
+* **Category:** Linux Security / POSIX DAC Permissions & User Isolation
+
+### Situation
+After executing `sudo -u bob sh -c "df -h >> /home/bob/disk-usage.log"`, attempting to inspect the file as primary administrative user `sysadmin` via `cat /home/bob/disk-usage.log` returned:
+```text
+cat: /home/bob/disk-usage.log: Permission denied
+```
+
+### Task
+Understand the permission enforcement mechanism and inspect the telemetry log without weakening standard Linux security controls.
+
+### Action
+1. Investigated directory permissions: Ran `ls -ld /home/bob` which revealed mode `750` (`drwxr-x---`) owned by `bob:bob`.
+2. Evaluated Discretionary Access Control (DAC): In order for a process to read a file (`r`), it must first possess execute/traverse (`x`) permissions across every parent directory in the path leading to that file.
+3. Because `sysadmin` is neither the file owner (`bob`) nor a member of the primary group `bob`, traverse access into `/home/bob/` was denied by the kernel, even though the file itself may have had read permissions.
+4. Viewed the file with appropriate elevated administrative authorization:
+   ```bash
+   sudo cat /home/bob/disk-usage.log
+   ```
+
+### Result
+The disk utilization table was rendered successfully. Confirmed that Ubuntu's default user home isolation functions as intended to prevent unauthorized lateral visibility between system users.
+
