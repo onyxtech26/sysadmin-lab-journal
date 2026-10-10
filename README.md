@@ -60,7 +60,7 @@ graph TD
   - [x] Active Directory Domain Services (AD DS) installation & forest promotion (`lab.local`)
   - [x] DHCP Server role installation and scope deployment (`10.10.10.100–200`)
   - [x] Enterprise Organizational Unit (OU) design, security groups, and bulk users
-  - [ ] Group Policy Object (GPO) creation and link enforcement
+  - [x] Group Policy Object (GPO) creation and link enforcement
   - [ ] Windows client domain-join validation
   - [ ] Helpdesk service request ticket simulation
 - [ ] **Phase 3: Linux Systems Administration & Hardening**
