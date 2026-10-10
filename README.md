@@ -1,6 +1,6 @@
 # Enterprise Systems Administration Lab Journal
 
-[![Lab Progress](https://img.shields.io/badge/Progress-Phase%202%20(Active%20Directory)-blue?style=flat-square)](#roadmap--progress-tracker)
+[![Lab Progress](https://img.shields.io/badge/Progress-Phase%203%20(Linux%20Administration)-blue?style=flat-square)](#roadmap--progress-tracker)
 [![Environment](https://img.shields.io/badge/Hypervisor-VirtualBox%207.2-orange?style=flat-square)](#lab-architecture--infrastructure-topology)
 [![OS](https://img.shields.io/badge/OS-Windows%20Server%202022%20Core%20%7C%20Ubuntu%20Server-brightgreen?style=flat-square)](#infrastructure-inventory)
 
@@ -64,7 +64,7 @@ graph TD
   - [x] Windows client domain-join validation
   - [x] Helpdesk service request ticket simulation
 - [ ] **Phase 3: Linux Systems Administration & Hardening**
-  - [ ] Linux RBAC (users, groups, octal permissions, visudo)
+  - [x] [Linux RBAC, users, groups, octal permissions, visudo](./03-linux-administration/01-rbac-users-groups.md)
   - [ ] Systemd service lifecycle management and journald log inspection
   - [ ] Cron automation, SSH key authentication hardening, Nginx & Samba setup
 - [ ] **Phase 4: Advanced Networking & pfSense Firewall**
@@ -110,7 +110,11 @@ sysadmin-lab-journal/
 │   ├── README.md
 │   ├── 01-server-core-initial-config.md
 │   ├── 02-adds-forest-deployment.md
-│   └── ... (future lab steps)
+│   └── ... (full AD deployment steps)
+├── 03-linux-administration/
+│   ├── README.md
+│   ├── 01-rbac-users-groups.md
+│   └── ... (in-progress administration steps)
 └── incident-log/
     └── incident-log.md
 ```

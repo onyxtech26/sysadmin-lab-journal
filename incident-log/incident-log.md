@@ -299,3 +299,59 @@ Identify why the SMB layer rejected write requests and align share permissions w
 ### Result
 Jane Doe successfully wrote `welcome.txt` to `S:\` and verified file integrity via `Get-Content`, confirming end-to-end RBAC functionality for the Sales department.
 
+---
+
+## Incident 10: `su: Authentication failure` on Newly Provisioned Linux User
+
+* **Date:** Phase 3 (Step 3.1)
+* **Impacted Node:** `lab-linux-01` (`10.10.10.11`)
+* **Category:** Linux IAM / Account Lifecycle & Authentication
+
+### Situation
+Immediately after provisioning standard user account `bob` with `sudo useradd -m -s /bin/bash bob` and assigning group memberships, running `su - bob` resulted in an immediate `su: Authentication failure`.
+
+### Task
+Diagnose why authentication was rejected and complete account initialization so the user can log in and execute workloads.
+
+### Action
+1. Investigated Linux account creation behavior: The low-level `useradd` utility creates user entries in `/etc/passwd` and creates the home directory when `-m` is specified. However, it does not prompt for or assign a password hash.
+2. Inspected `/etc/shadow` structure: When created without an initial password, `useradd` places an exclamation mark (`!`) in the password hash field. This explicitly locks the account, blocking all password-based authentication (`PAM` module `pam_unix.so` automatically rejects attempts).
+3. Initialized credentials for the account:
+   ```bash
+   sudo passwd bob
+   ```
+   Entered a compliant password to replace the locked token in `/etc/shadow` with a salted SHA-512 crypt hash.
+
+### Result
+Account was unlocked immediately. Subsequent login attempts via `su - bob` authenticated cleanly, confirming the account lifecycle was properly finalized.
+
+---
+
+## Incident 11: `sudo: A terminal is required to authenticate` in Non-Interactive Execution
+
+* **Date:** Phase 3 (Step 3.2)
+* **Impacted Node:** `lab-linux-01` (`10.10.10.11`)
+* **Category:** Linux Security / Sudo Privileges & Terminal Allocation (TTY)
+
+### Situation
+When attempting to verify Bob's newly delegated sudo rights from the admin terminal using `su - bob -c "sudo whoami"`, `sudo` aborted execution with the error:
+```text
+sudo: A terminal is required to authenticate
+```
+
+### Task
+Safely verify Bob's administrative delegation without compromising system security controls or introducing insecure nopasswd sudoers rules.
+
+### Action
+1. Analyzed security mechanism: The `su` command's `-c` flag executes a single command string non-interactively in a child sub-shell without allocating a pseudo-terminal (TTY).
+2. By default, `sudo` enforces interactive TTY allocation for password entry (`requiretty` or default PAM authentication) to protect against script-based shoulder-surfing or brute-force injection attacks. When `sudo` detected that standard input was not attached to a TTY, it immediately aborted to prevent password leakage.
+3. Transitioned to an interactive user session:
+   ```bash
+   su - bob
+   # Inside interactive session with allocated TTY:
+   sudo whoami
+   ```
+
+### Result
+`sudo` displayed the secure password prompt on the allocated TTY. Upon supplying credentials, `sudo whoami` returned `root`, confirming that `%devteam` sudoers delegation was operating correctly within security compliance boundaries.
+
